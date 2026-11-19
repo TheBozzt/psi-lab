@@ -14,19 +14,19 @@
 
 #define PORT "8080"
 #define LISTEN_QS 5
-#define BSIZE 4
+#define BSIZE 1024
 
 #define bailout(s) { err(1, s); }
 
 void get_hash(char* hash, uint8_t* p) {
-    for (unsigned int i = 0; i < 16; ++i){
+    for (int i = 0; i < 16; ++i){
         sprintf(hash + i * 2, "%02x", p[i]);
     }
     hash[32] = '\n';
 }
 
 void handleConnection(int sock) {
-    char buf[BSIZE];
+    char buf[BSIZE], result[33];
     memset(buf, 0, BSIZE);
 
     ssize_t val;
@@ -47,7 +47,6 @@ void handleConnection(int sock) {
         md5Update(&ctx, buf, val - 1);
         md5Finalize(&ctx);
 
-        char result[33];
         get_hash(result, ctx.digest);
         write(sock, result, 33);
 
@@ -61,7 +60,6 @@ void handleConnection(int sock) {
 void endChild(int) {
     wait(NULL);
 }
-
 
 int main(int argc, char** argv) {
     struct addrinfo hints;
