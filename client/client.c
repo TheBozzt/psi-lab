@@ -1,6 +1,86 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
-int main() {
-    printf("Hello World from client!\n");
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+int main(int argc, char *argv[]) {
+    int sock = 0;
+    struct sockaddr_in serv_addr;
+    char buffer[BUFFER_SIZE] = {0};
+    
+    const char *host = (argc > 1) ? argv[1] : "127.0.0.1";
+
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("Błąd tworzenia gniazda");
+        return -1;
+    }
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+
+    // konwersja ip
+    if (inet_pton(AF_INET, host, &serv_addr.sin_addr) <= 0) {
+        perror("Nieprawidłowy adres IP");
+        return -1;
+    }
+
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+        perror("Błąd połączenia z serwerem");
+        return -1;
+    }
+
+    printf("Połączono z serwerem\n");
+
+    char input[BUFFER_SIZE];
+    char reply[BUFFER_SIZE];
+
+    while (1) {
+        printf("> ");
+        fflush(stdout);
+
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            break; // EOF
+        }
+
+        // czyszczenie konca lini
+        input[strcspn(input, "\r\n")] = '\0';
+
+        if (strcmp(input, "exit") == 0) {
+            printf("Poloczenie zamknięte\n");
+            break;
+        }
+
+        if (strlen(input) == 0) {
+            continue;
+        }
+
+        if (send(sock, input, strlen(input), 0) < 0) {
+            perror("Błąd wysyłania danych");
+            break;
+        }
+
+        // odpowiedz
+        ssize_t bytes_read = recv(sock, reply, sizeof(reply) - 1, 0);
+        if (bytes_read > 0) {
+            reply[bytes_read] = '\0';
+            printf("Serwer: %s\n", reply);
+        } else if (bytes_read == 0) {
+            printf("Serwer zamknął połączenie.\n");
+            break;
+        } else {
+            perror("Błąd odbierania danych");
+            break;
+        }
+    }
+
+    close(sock);
+
     return 0;
 }
