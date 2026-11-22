@@ -12,7 +12,6 @@
 int main(int argc, char *argv[]) {
     int sock = 0;
     struct sockaddr_in serv_addr;
-    char buffer[BUFFER_SIZE] = {0};
 
     const char *host = (argc > 1) ? argv[1] : "127.0.0.1";
 
@@ -42,21 +41,15 @@ int main(int argc, char *argv[]) {
 
     if (argc > 2) {
         for (int i = 2; i < argc; i++) {
-            if (send(sock, argv[i], strlen(argv[i]), 0) < 0) {
+            // +1 ponieważ strlen nie wlicza znaku '\0', który musimy koniecznie przekazać
+            if (send(sock, argv[i], strlen(argv[i]) + 1, 0) < 0) {
                 perror("Błąd wysyłania danych");
                 break;
             }
 
-            // żeby serwer wiedział, że to już koniec
-            if (send(sock, "\n", 1, 0) < 0) {
-                perror("Błąd wysyłania znaku nowej linii");
-                break;
-            }
-
             // odpowiedz
-            ssize_t bytes_read = recv(sock, reply, sizeof(reply) - 1, 0);
+            ssize_t bytes_read = recv(sock, reply, sizeof(reply), 0);
             if (bytes_read > 0) {
-                reply[bytes_read] = '\0';
                 printf("Serwer: %s", reply);
             } else if (bytes_read == 0) {
                 printf("Serwer zamknął połączenie.\n");
@@ -76,12 +69,9 @@ int main(int argc, char *argv[]) {
         fflush(stdout);
 
         // sizeof(input) -1, by zostało miejsce na odpisanie \n
-        if (fgets(input, sizeof(input) - 1, stdin) == NULL) {
+        if (fgets(input, sizeof(input), stdin) == NULL) {
             break; // EOF
         }
-
-        // czyszczenie konca lini
-        input[strcspn(input, "\r\n")] = '\0';
 
         if (strcmp(input, "exit") == 0) {
             printf("Połączenie zamknięte\n");
@@ -92,17 +82,14 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        strcat(input, "\n");
-
-        if (send(sock, input, strlen(input), 0) < 0) {
+        if (send(sock, input, strlen(input) + 1, 0) < 0) {
             perror("Błąd wysyłania danych");
             break;
         }
 
         // odpowiedz
-        ssize_t bytes_read = recv(sock, reply, sizeof(reply) - 1, 0);
+        ssize_t bytes_read = recv(sock, reply, sizeof(reply), 0);
         if (bytes_read > 0) {
-            reply[bytes_read] = '\0';
             printf("Serwer: %s", reply);
         } else if (bytes_read == 0) {
             printf("Serwer zamknął połączenie.\n");

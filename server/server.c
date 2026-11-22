@@ -22,7 +22,7 @@ void get_hash(char* hash, uint8_t* p) {
     for (int i = 0; i < 16; ++i){
         sprintf(hash + i * 2, "%02x", p[i]);
     }
-    hash[32] = '\n';
+    hash[32] = '\0';
 }
 
 void handleConnection(int sock) {
@@ -38,7 +38,7 @@ void handleConnection(int sock) {
         if (val == -1)
             bailout("Reading stream message");
 
-        if (buf[val - 1] != '\n') {
+        if (buf[val - 1] != '\0') {
             md5Update(&ctx, buf, val);
             memset(buf, 0, BSIZE);
             continue;
