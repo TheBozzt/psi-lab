@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
             // odpowiedz
             ssize_t bytes_read = recv(sock, reply, sizeof(reply), 0);
             if (bytes_read > 0) {
-                printf("Serwer: %s", reply);
+                printf("Serwer: %s\n", reply);
             } else if (bytes_read == 0) {
                 printf("Serwer zamknął połączenie.\n");
                 break;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
         // odpowiedz
         ssize_t bytes_read = recv(sock, reply, sizeof(reply), 0);
         if (bytes_read > 0) {
-            printf("Serwer: %s", reply);
+            printf("Serwer: %s\n", reply);
         } else if (bytes_read == 0) {
             printf("Serwer zamknął połączenie.\n");
             break;
