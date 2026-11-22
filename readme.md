@@ -34,3 +34,13 @@ docker network create --subnet=172.21.38.0/24 z38_network
     ```bash
     docker compose down
     ```
+
+## Użycie klienta (bezpośrednio)
+
+```bash
+./client [adres_IP] [wiadomość_1] [wiadomość_2] ...
+```
+
+- Przy braku argumentów klient łączy się z domyślnym adresem `127.0.0.1` i uruchamia tryb interaktywny.
+- Przy podaniu samego adresu IP (np. `./client 172.21.38.0`) klient łączy się ze wskazanym serwerem i uruchamia tryb interaktywny.
+- Przy większej liczbie argumentów (np. `./client 172.21.38.0 "tekst 1" "tekst 2"`) klient wysyła podane ciągi znaków jeden po drugim.
