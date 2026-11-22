@@ -1,0 +1,5 @@
+FROM gcc:16.2
+COPY . /Server
+WORKDIR /Server/
+RUN make all
+CMD ["./server"]

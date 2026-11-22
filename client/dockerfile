@@ -1,0 +1,5 @@
+FROM gcc:16.2
+COPY . /Client
+WORKDIR /Client
+RUN make all
+ENTRYPOINT  ["./client"]
