@@ -1,0 +1,25 @@
+services:
+  server:
+    container_name: z38_server
+    build: ./server
+    image: z38_server_1c
+    tty: true
+    networks:
+      z38_network:
+        ipv4_address: 172.21.38.10
+
+  client:
+    container_name: z38_client
+    build: ./client
+    image: z38_client_1c
+    tty: true
+    stdin_open: true
+    depends_on:
+      - server
+    command: ["172.21.38.10"]
+    networks:
+      - z38_network
+
+networks:
+  z38_network:
+    external: true
